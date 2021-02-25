@@ -81,6 +81,7 @@ public class TranslateTask extends Task.Backgroundable {
             if (progressIndicator.isCanceled()) break;
 
             progressIndicator.setText("Translating in the " + toLanguage.getEnglishName() + " language...");
+            progressIndicator.setFraction(0);
 
             if (isOverwriteExistingString) {
                 translate(progressIndicator, translator, toLanguage, null);
@@ -111,8 +112,13 @@ public class TranslateTask extends Task.Backgroundable {
 
     private void translate(@NotNull ProgressIndicator progressIndicator, Querier<AbstractTranslator> translator, LANG toLanguage, @Nullable List<AndroidString> list) {
         List<AndroidString> writeAndroidString = new ArrayList<>();
+        float progressCounter = 0;
+        float total = mAndroidStrings.size() +1 ;
         for (AndroidString androidString : mAndroidStrings) {
             if (progressIndicator.isCanceled()) break;
+
+            progressCounter++;
+            progressIndicator.setFraction(progressCounter / total);
 
             if (!androidString.isTranslatable()) {
                 continue;
