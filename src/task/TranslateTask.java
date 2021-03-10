@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import translate.lang.LANG;
 import translate.querier.Querier;
 import translate.trans.AbstractTranslator;
+import translate.trans.impl.GoogleCloudTranslator;
 import translate.trans.impl.GoogleTranslator;
 
 import java.io.*;
@@ -74,7 +75,8 @@ public class TranslateTask extends Task.Backgroundable {
                 .getBoolean(Constants.KEY_IS_OVERWRITE_EXISTING_STRING);
         Querier<AbstractTranslator> translator = new Querier<>();
         GoogleTranslator googleTranslator = new GoogleTranslator();
-        translator.attach(googleTranslator);
+        GoogleCloudTranslator cloudTranslator = new GoogleCloudTranslator();
+        translator.attach(cloudTranslator);
         mWriteData.clear();
 
         for (LANG toLanguage : mLanguages) {
