@@ -30,5 +30,7 @@ public interface Constants {
     String KEY_IS_OVERWRITE_EXISTING_STRING = PLUGIN_ID.concat(".is_overwrite_existing_string");
 
     String KEY_IS_SELECT_ALL = PLUGIN_ID.concat(".is_select_all");
+    String KEY_USE_GOOGLE_CLOUD_SERVICE = PLUGIN_ID.concat(".use_google_cloud_service");
+    String KEY_GOOGLE_CLOUD_SERVICE_CERT_PATH = PLUGIN_ID.concat(".google_cloud_service_cert_path");
 
 }

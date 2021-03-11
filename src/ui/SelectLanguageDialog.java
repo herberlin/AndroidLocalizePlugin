@@ -20,16 +20,21 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBCheckBox;
 import constant.Constants;
 import logic.LanguageHelper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import translate.lang.LANG;
 import translate.trans.impl.GoogleTranslator;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -40,14 +45,22 @@ import java.util.List;
  * @author airsaid
  */
 public class SelectLanguageDialog extends DialogWrapper {
-    private JPanel    myPanel;
+    private JPanel myPanel;
     private JCheckBox overwriteExistingStringCheckBox;
     private JCheckBox selectAllCheckBox;
-    private JPanel    languagesPanel;
+    private JPanel languagesPanel;
+    private JCheckBox certCheckbox;
+    private JTextField certInput;
+    private JButton certButton;
+    private JTextPane getYourCertificateAtTextPane;
 
-    private Project         mProject;
+    private Project mProject;
     private OnClickListener mOnClickListener;
-    private List<LANG>      mSelectLanguages = new ArrayList<>();
+    private List<LANG> mSelectLanguages = new ArrayList<>();
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+    }
 
     public interface OnClickListener {
         void onClickListener(List<LANG> selectedLanguage);
@@ -99,23 +112,62 @@ public class SelectLanguageDialog extends DialogWrapper {
             }
         }
 
-        boolean isOverwriteExistingString = PropertiesComponent.getInstance(mProject)
-                .getBoolean(Constants.KEY_IS_OVERWRITE_EXISTING_STRING);
+        final PropertiesComponent props = PropertiesComponent.getInstance(mProject);
+
+        boolean isOverwriteExistingString = props.getBoolean(Constants.KEY_IS_OVERWRITE_EXISTING_STRING);
         overwriteExistingStringCheckBox.setSelected(isOverwriteExistingString);
         overwriteExistingStringCheckBox.addItemListener(e -> {
             int state = e.getStateChange();
-            PropertiesComponent.getInstance(mProject)
-                    .setValue(Constants.KEY_IS_OVERWRITE_EXISTING_STRING, state == ItemEvent.SELECTED);
+            props.setValue(Constants.KEY_IS_OVERWRITE_EXISTING_STRING, state == ItemEvent.SELECTED);
         });
 
-        boolean isSelectAll = PropertiesComponent.getInstance(mProject)
-                .getBoolean(Constants.KEY_IS_SELECT_ALL);
+        boolean isSelectAll = props.getBoolean(Constants.KEY_IS_SELECT_ALL);
         selectAllCheckBox.setSelected(isSelectAll);
         selectAllCheckBox.addItemListener(e -> {
             int state = e.getStateChange();
             selectAll(state == ItemEvent.SELECTED);
-            PropertiesComponent.getInstance(mProject)
-                    .setValue(Constants.KEY_IS_SELECT_ALL, state == ItemEvent.SELECTED);
+            props.setValue(Constants.KEY_IS_SELECT_ALL, state == ItemEvent.SELECTED);
+        });
+
+
+        // use payed cloud service checkbox
+        certCheckbox.setSelected(props.getBoolean(Constants.KEY_USE_GOOGLE_CLOUD_SERVICE));
+        certCheckbox.addItemListener(e -> {
+            props.setValue(Constants.KEY_USE_GOOGLE_CLOUD_SERVICE, e.getStateChange() == ItemEvent.SELECTED);
+        });
+
+        // certificate location
+        certInput.setText(props.getValue(Constants.KEY_GOOGLE_CLOUD_SERVICE_CERT_PATH, ""));
+        certInput.getDocument().addDocumentListener(new DocumentAdapter() {
+            @Override
+            protected void textChanged(@NotNull DocumentEvent documentEvent) {
+                props.setValue(Constants.KEY_GOOGLE_CLOUD_SERVICE_CERT_PATH, certInput.getText());
+            }
+        });
+
+        // certification choose button
+        certButton.addActionListener(a -> {
+            JFileChooser fileChooser = new JFileChooser(props.getValue(Constants.KEY_GOOGLE_CLOUD_SERVICE_CERT_PATH));
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f!= null && f.getName().endsWith(".json");
+                }
+
+                @Override
+                public String getDescription() {
+                    return ".json";
+                }
+            });
+            if (fileChooser.showOpenDialog(myPanel) == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                if (file != null && file.exists() && file.isFile() && file.canRead()) {
+                    String cert = file.toString();
+                    certInput.setText(cert);
+                    props.setValue(Constants.KEY_GOOGLE_CLOUD_SERVICE_CERT_PATH, cert);
+                }
+            }
         });
     }
 

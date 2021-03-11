@@ -16,6 +16,8 @@ public class GoogleCloudTranslator extends AbstractTranslator {
 
     public GoogleCloudTranslator() {
         super(null);
+
+        // TODO: Continue here
         String jsonPath = "C:/Users/Hans-Joachim.HERBERT/eclipse/key.boatspeed-translate.json";
         try {
             GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(jsonPath))

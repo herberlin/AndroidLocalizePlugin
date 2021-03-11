@@ -62,9 +62,11 @@ public class LanguageHelper {
     @Nullable
     public static List<String> getSelectedLanguageCodes(@NotNull Project project) {
         Objects.requireNonNull(project);
-
-        String codeString = PropertiesComponent.getInstance(project)
-                .getValue(Constants.KEY_SELECTED_LANGUAGES);
+        PropertiesComponent propsComp = PropertiesComponent.getInstance(project);
+        if (propsComp==null){
+            return null;
+        }
+        String codeString =propsComp.getValue(Constants.KEY_SELECTED_LANGUAGES);
 
         if (TextUtils.isEmpty(codeString)) {
             return null;
