@@ -29,6 +29,15 @@
 - Step 3: Select the language to be translated.
 - Step 4: Click ok.
 
+# Payed translations
+You may use the payed translations from google cloud.
+
+- Step 1: Get your certificate at https://cloud.google.com/translate
+- Step 2: Configure the plugin as shown:
+  ![Image Clout Translate](preview/cloud-translate.png)
+  
+
+
 # FAQ
 - Q1: Empty characters after translation?
 
