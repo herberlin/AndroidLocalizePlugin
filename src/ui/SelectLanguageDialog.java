@@ -53,6 +53,7 @@ public class SelectLanguageDialog extends DialogWrapper {
     private JTextField certInput;
     private JButton certButton;
     private JTextPane getYourCertificateAtTextPane;
+    private JScrollPane languageScrollPanel;
 
     private Project mProject;
     private OnClickListener mOnClickListener;

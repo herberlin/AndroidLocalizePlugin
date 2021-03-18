@@ -5,6 +5,8 @@ import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
 import com.google.common.collect.Lists;
+import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.project.Project;
 import translate.lang.LANG;
 import translate.trans.AbstractTranslator;
 
@@ -14,17 +16,16 @@ import java.io.IOException;
 public class GoogleCloudTranslator extends AbstractTranslator {
     Translate translate = null;
 
-    public GoogleCloudTranslator() {
+    public GoogleCloudTranslator(String credentialFile) {
         super(null);
 
-        // TODO: Continue here
-        String jsonPath = "C:/Users/Hans-Joachim.HERBERT/eclipse/key.boatspeed-translate.json";
         try {
-            GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(jsonPath))
+            GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialFile))
                     .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
             translate = TranslateOptions.newBuilder().setCredentials(credentials).build().getService();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -34,6 +35,7 @@ public class GoogleCloudTranslator extends AbstractTranslator {
     }
 
     private Translation translation;
+
     @Override
     public void setFormData(LANG from, LANG to, String text) {
 
@@ -55,5 +57,10 @@ public class GoogleCloudTranslator extends AbstractTranslator {
     @Override
     public String parses(String text) throws IOException {
         return text;
+    }
+
+    @Override
+    public void close() {
+
     }
 }

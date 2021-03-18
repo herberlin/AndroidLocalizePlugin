@@ -73,10 +73,24 @@ public class TranslateTask extends Task.Backgroundable {
     public void run(@NotNull ProgressIndicator progressIndicator) {
         boolean isOverwriteExistingString = PropertiesComponent.getInstance(myProject)
                 .getBoolean(Constants.KEY_IS_OVERWRITE_EXISTING_STRING);
-        Querier<AbstractTranslator> translator = new Querier<>();
-        GoogleTranslator googleTranslator = new GoogleTranslator();
-        GoogleCloudTranslator cloudTranslator = new GoogleCloudTranslator();
-        translator.attach(cloudTranslator);
+        Querier<AbstractTranslator> querier = new Querier<>();
+
+        PropertiesComponent props = PropertiesComponent.getInstance(getProject());
+        boolean useGoogleCloudTranslater = props.getBoolean(Constants.KEY_USE_GOOGLE_CLOUD_SERVICE);
+        String googleCloudCertificateFile = props.getValue(Constants.KEY_GOOGLE_CLOUD_SERVICE_CERT_PATH);
+        AbstractTranslator translator =null;
+        if (useGoogleCloudTranslater && googleCloudCertificateFile != null) {
+            File file = new File(googleCloudCertificateFile);
+            if (file.exists() && file.isFile() && file.canRead()) {
+                translator =  new GoogleCloudTranslator(googleCloudCertificateFile);
+            } else {
+                progressIndicator.cancel();
+                throw new RuntimeException("Can't read google certificate at: " + googleCloudCertificateFile);
+            }
+        } else {
+            translator = new GoogleTranslator();
+        }
+        querier.attach(translator);
         mWriteData.clear();
 
         for (LANG toLanguage : mLanguages) {
@@ -86,7 +100,7 @@ public class TranslateTask extends Task.Backgroundable {
             progressIndicator.setFraction(0);
 
             if (isOverwriteExistingString) {
-                translate(progressIndicator, translator, toLanguage, null);
+                translate(progressIndicator, querier, toLanguage, null);
                 continue;
             }
 
@@ -94,21 +108,22 @@ public class TranslateTask extends Task.Backgroundable {
                 VirtualFile virtualFile = getVirtualFile(toLanguage);
 
                 if (virtualFile == null) {
-                    translate(progressIndicator, translator, toLanguage, null);
+                    translate(progressIndicator, querier, toLanguage, null);
                     return;
                 }
 
                 PsiFile psiFile = PsiManager.getInstance(myProject).findFile(virtualFile);
                 if (psiFile == null) {
-                    translate(progressIndicator, translator, toLanguage, null);
+                    translate(progressIndicator, querier, toLanguage, null);
                     return;
                 }
 
                 List<AndroidString> androidStrings = ParseStringXml.parse(progressIndicator, psiFile);
-                translate(progressIndicator, translator, toLanguage, androidStrings);
+                translate(progressIndicator, querier, toLanguage, androidStrings);
             });
         }
-        googleTranslator.close();
+
+        translator.close();
         writeResultData(progressIndicator);
     }
 

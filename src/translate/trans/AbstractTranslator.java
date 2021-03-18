@@ -45,7 +45,7 @@ public abstract class AbstractTranslator extends AbstractHttpAttribute implement
      */
     public abstract void setLangSupport();
 
-    /**
+     /**
      * Get the language currently supported for translation.
      *
      * @return support lang list.
