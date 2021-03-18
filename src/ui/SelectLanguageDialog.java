@@ -153,7 +153,7 @@ public class SelectLanguageDialog extends DialogWrapper {
             fileChooser.setFileFilter(new FileFilter() {
                 @Override
                 public boolean accept(File f) {
-                    return f!= null && f.getName().endsWith(".json");
+                    return f!= null &&(f.isDirectory() || f.getName().endsWith(".json"));
                 }
 
                 @Override
